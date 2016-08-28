@@ -39,6 +39,7 @@
     // Do any additional setup after loading the view, typically from a nib.
     self.navigationItem.leftBarButtonItem = self.settingButtonItem;
     self.navigationItem.rightBarButtonItem = self.addNewButtonItem;
+    self.navigationItem.title = @"进行中";
     
     self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     if ([self.objects count] > 0) {
@@ -321,13 +322,22 @@
 
 -(UIBarButtonItem*) addNewButtonItem
 {
-    _addNewButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
+    if (_addNewButtonItem)
+        return _addNewButtonItem;
+        
+        _addNewButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"添加" style:0 target:self action:@selector(insertNewObject:)];
     return _addNewButtonItem;
 }
 
 -(UIBarButtonItem*) settingButtonItem
 {
-    _settingButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(setting:)];
+    //_settingButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemOrganize target:self action:@selector(setting:)];
+    //return _settingButtonItem;
+    
+    if (_settingButtonItem)
+        return _settingButtonItem;
+    
+    _settingButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"切换" style:0 target:self action:@selector(setting:)];
     return _settingButtonItem;
 }
 
@@ -336,7 +346,7 @@
     if (_objects == nil)
     {
         LKDBHelper *globalHelper = [CureData getUsingLKDBHelper];
-        NSString *sql = [NSString stringWithFormat:@"select name, cureDuration, date, max(date) from @t group by name order by date asc"];
+        NSString *sql = [NSString stringWithFormat:@"select name, cureDuration, date, max(date) from @t group by name order by date asc limit 10"];
         
         _objects = [globalHelper searchWithSQL:sql toClass:[CureData class]];
         //_objects = [CureData searchWithWhere:nil orderBy:@"timeIntervalSince1970 desc" offset:0 count:100];

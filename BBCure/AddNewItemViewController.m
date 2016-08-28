@@ -272,7 +272,7 @@
 //此方法可将图片压缩，但是图片质量基本不变，第二个参数即图片质量参数
 -(void)saveImage:(UIImage*)currentImage withName:(NSString*)imageName
 {
-    NSData *imageData = UIImageJPEGRepresentation(currentImage, 0.5);
+    NSData *imageData = UIImageJPEGRepresentation(currentImage, 0.2);
     
     // 获取沙盒目录
     NSString *fullPath = [[NSHomeDirectory() stringByAppendingPathComponent:@"Documents"] stringByAppendingPathComponent:imageName];

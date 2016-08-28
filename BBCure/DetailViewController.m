@@ -50,6 +50,7 @@
     self.navigationItem.title = self.detailName;
     [self.view addSubview:self.scrollview];
     
+    
 }
 
 -(void)viewDidAppear:(BOOL)animated
@@ -351,8 +352,11 @@
     float width = 140;
     
     NSInteger index = 0;
-    for (CureData *data in self.objects ){
-        if (data.image != nil) {
+    
+    BOOL bShowImg = NO;
+    if (bShowImg)
+        for (CureData *data in self.objects ){
+            if (data.image != nil) {
             MHPresenterImageView *imageView = [[MHPresenterImageView alloc] initWithFrame:CGRectMake(x, y, width, width)];
             imageView.tag = index++;
             [imageView setImage:data.image];
@@ -365,7 +369,7 @@
             
             x += imageView.frame.size.width + space;
         }
-    }
+        }
     NSLog(@"%f, %f", _scrollview.frame.size.height, _scrollview.frame.size.width);
     return _scrollview;
 }
