@@ -1,0 +1,17 @@
+//
+//  BBCure-Prefix.pch
+//  BBCure
+//
+//  Created by Chen on 15/5/31.
+//  Copyright (c) 2015年 Chen. All rights reserved.
+//
+
+#ifndef BBCure_BBCure_Prefix_pch
+#define BBCure_BBCure_Prefix_pch
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+#import "AppMacro.h"
+
+
+#endif
