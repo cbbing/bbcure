@@ -11,6 +11,7 @@
 #import "BKPasscodeViewController.h"
 #import "SettingViewController.h"
 #import "AppMacro.h"
+#import "PellTableViewSelect.h"
 
 
 @interface MasterViewController ()
@@ -39,7 +40,7 @@
     // Do any additional setup after loading the view, typically from a nib.
     self.navigationItem.leftBarButtonItem = self.settingButtonItem;
     self.navigationItem.rightBarButtonItem = self.addNewButtonItem;
-    self.navigationItem.title = @"进行中";
+    self.navigationItem.title = @"列表";
     
     self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     if ([self.objects count] > 0) {
@@ -213,7 +214,47 @@
 
 #pragma mark - event response
 
+- (void)selectAction:(id)sender {
+    [PellTableViewSelect addPellTableViewSelectWithWindowFrame:CGRectMake(self.view.bounds.size.width-100, 64, 100, 100) selectData:
+     
+     @[@"添加条目",@"显示隐藏"]
+                                                        action:^(NSInteger index) {
+                                                            
+                                                            NSLog(@"选择了 %ld",index);
+                                                        } animated:YES];
+    return;
+}
+
 - (void)insertNewObject:(id)sender {
+    
+    
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"保存或删除数据" message:@"删除数据将不可恢复" preferredStyle: UIAlertControllerStyleActionSheet];
+    
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
+    UIAlertAction *deleteAction = [UIAlertAction actionWithTitle:@"删除" style:UIAlertActionStyleDestructive handler:nil];
+    UIAlertAction *archiveAction = [UIAlertAction actionWithTitle:@"保存" style:UIAlertActionStyleDefault handler:nil];
+    [alertController addAction:cancelAction];
+    [alertController addAction:deleteAction];
+    [alertController addAction:archiveAction];
+    
+    alertController.modalPresentationStyle = UIModalPresentationPopover;
+    [self presentViewController:alertController animated:YES completion:nil];
+    UIPopoverPresentationController *presentationController = [alertController popoverPresentationController];
+    presentationController.permittedArrowDirections = UIPopoverArrowDirectionLeft | UIPopoverArrowDirectionRight;
+    presentationController.sourceView = sender;
+    presentationController.sourceRect = CGRectMake(0, 0, 200, 200);
+    
+    /*
+    UIPopoverPresentationController *popover = alertController.popoverPresentationController;
+    if (popover){
+        popover.sourceView = sender;
+        //popover.sourceRect = sender.bounds;
+        popover.permittedArrowDirections = UIPopoverArrowDirectionAny;
+    }
+    */
+    return;
+    
     
     UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
 
@@ -325,7 +366,7 @@
     if (_addNewButtonItem)
         return _addNewButtonItem;
         
-        _addNewButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"添加" style:0 target:self action:@selector(insertNewObject:)];
+        _addNewButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"添加" style:0 target:self action:@selector(selectAction:)];
     return _addNewButtonItem;
 }
 
@@ -337,7 +378,7 @@
     if (_settingButtonItem)
         return _settingButtonItem;
     
-    _settingButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"切换" style:0 target:self action:@selector(setting:)];
+    _settingButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"设置" style:0 target:self action:@selector(setting:)];
     return _settingButtonItem;
 }
 
