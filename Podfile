@@ -8,4 +8,5 @@ target 'BBCure' do
 	pod 'MHVideoPhotoGallery'
 	pod 'BKPasscodeView', '~> 0.1.2'
 	pod 'WYPopoverController', '~> 0.2.2'
+	pod "AFNetworking", "~> 2.0"
 end

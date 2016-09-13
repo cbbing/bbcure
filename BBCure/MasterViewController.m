@@ -12,6 +12,7 @@
 #import "SettingViewController.h"
 #import "AppMacro.h"
 #import "PellTableViewSelect.h"
+#import <AFNetworking.h>
 
 
 @interface MasterViewController ()
@@ -217,10 +218,17 @@
 - (void)selectAction:(id)sender {
     [PellTableViewSelect addPellTableViewSelectWithWindowFrame:CGRectMake(self.view.bounds.size.width-100, 64, 100, 100) selectData:
      
-     @[@"添加条目",@"显示隐藏"]
+     @[@"添加条目",@"隐藏条目"]
                                                         action:^(NSInteger index) {
                                                             
                                                             NSLog(@"选择了 %ld",index);
+                                                            if (index==0) {
+                                                                [self insertNewObject:sender];
+                                                            }
+                                                            else {
+                                                                
+                                                            }
+                                                                
                                                         } animated:YES];
     return;
 }
@@ -229,31 +237,31 @@
     
     
     
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"保存或删除数据" message:@"删除数据将不可恢复" preferredStyle: UIAlertControllerStyleActionSheet];
-    
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
-    UIAlertAction *deleteAction = [UIAlertAction actionWithTitle:@"删除" style:UIAlertActionStyleDestructive handler:nil];
-    UIAlertAction *archiveAction = [UIAlertAction actionWithTitle:@"保存" style:UIAlertActionStyleDefault handler:nil];
-    [alertController addAction:cancelAction];
-    [alertController addAction:deleteAction];
-    [alertController addAction:archiveAction];
-    
-    alertController.modalPresentationStyle = UIModalPresentationPopover;
-    [self presentViewController:alertController animated:YES completion:nil];
-    UIPopoverPresentationController *presentationController = [alertController popoverPresentationController];
-    presentationController.permittedArrowDirections = UIPopoverArrowDirectionLeft | UIPopoverArrowDirectionRight;
-    presentationController.sourceView = sender;
-    presentationController.sourceRect = CGRectMake(0, 0, 200, 200);
-    
-    /*
-    UIPopoverPresentationController *popover = alertController.popoverPresentationController;
-    if (popover){
-        popover.sourceView = sender;
-        //popover.sourceRect = sender.bounds;
-        popover.permittedArrowDirections = UIPopoverArrowDirectionAny;
-    }
-    */
-    return;
+//    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"保存或删除数据" message:@"删除数据将不可恢复" preferredStyle: UIAlertControllerStyleActionSheet];
+//    
+//    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];
+//    UIAlertAction *deleteAction = [UIAlertAction actionWithTitle:@"删除" style:UIAlertActionStyleDestructive handler:nil];
+//    UIAlertAction *archiveAction = [UIAlertAction actionWithTitle:@"保存" style:UIAlertActionStyleDefault handler:nil];
+//    [alertController addAction:cancelAction];
+//    [alertController addAction:deleteAction];
+//    [alertController addAction:archiveAction];
+//    
+//    alertController.modalPresentationStyle = UIModalPresentationPopover;
+//    [self presentViewController:alertController animated:YES completion:nil];
+//    UIPopoverPresentationController *presentationController = [alertController popoverPresentationController];
+//    presentationController.permittedArrowDirections = UIPopoverArrowDirectionLeft | UIPopoverArrowDirectionRight;
+//    presentationController.sourceView = sender;
+//    presentationController.sourceRect = CGRectMake(0, 0, 200, 200);
+//    
+//    /*
+//    UIPopoverPresentationController *popover = alertController.popoverPresentationController;
+//    if (popover){
+//        popover.sourceView = sender;
+//        //popover.sourceRect = sender.bounds;
+//        popover.permittedArrowDirections = UIPopoverArrowDirectionAny;
+//    }
+//    */
+//    return;
     
     
     UIStoryboard *story = [UIStoryboard storyboardWithName:@"Main" bundle:[NSBundle mainBundle]];
@@ -366,7 +374,7 @@
     if (_addNewButtonItem)
         return _addNewButtonItem;
         
-        _addNewButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"添加" style:0 target:self action:@selector(selectAction:)];
+        _addNewButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"添加" style:0 target:self action:@selector(insertNewObject:)];
     return _addNewButtonItem;
 }
 
@@ -391,6 +399,56 @@
         
         _objects = [globalHelper searchWithSQL:sql toClass:[CureData class]];
         //_objects = [CureData searchWithWhere:nil orderBy:@"timeIntervalSince1970 desc" offset:0 count:100];
+        
+        //请求参数
+        NSDictionary *parameters = @{
+                                     @"name" : @"iosuser",
+                                     @"cureDuration" : @"12",
+                                     @"create_at" : @"2016-09-13 22:23:26",
+                                     @"note" : @"yes",
+                                     @"operator" : @"bbchen",
+                                     @"status" : @"0"
+                                     };
+        //请求的manager
+        AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+        /*
+         * desc  : 提交POST请求
+         * param :  URLString - 请求地址
+         *          parameters - 请求参数
+         *          success - 请求成功回调的block
+         *          failure - 请求失败回调的block
+         */
+        NSString *SERVER_URL = @"http://101.200.184.162:8080";
+        NSString *update_date = @"/bbcure/update_data/";
+        
+        [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+            CureData *data = self.objects[0];
+            UIImage *image = data.image;
+            NSData *data_img = UIImageJPEGRepresentation(image, 1.0);
+            [formData appendPartWithFileData:data_img name:@"ios_image1" fileName:@"image1.jpg" mimeType:@"image/jpeg"];
+            
+        } success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
+            NSLog(@"update sucess!!!");
+        } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
+            NSLog(@"err:%@", error);
+        }];
+        
+        /*
+        [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:parameters success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
+            NSLog(@"update sucess!!!");
+            if (responseObject != nil) {
+                NSDictionary *respObj = responseObject;
+                NSString *result = [respObj objectForKey:@"result"];
+                if (result && [result isEqualToString:@"ok"]) {
+                    NSLog(@"the result: %@", result);
+                }
+                
+            }
+        } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
+            NSLog(@"err:%@", error);
+        }];*/
+        
+        
         
     }
     return _objects;
