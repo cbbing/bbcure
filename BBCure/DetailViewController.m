@@ -12,6 +12,7 @@
 #import "UIDetailTableCell.h"
 #import "MHPresenterImageView.h"
 #import "UIImageView+WebCache.h"
+#import <AFNetworking.h>
 
 #define addText(fmt, ...) [self add:[NSString stringWithFormat:fmt,##__VA_ARGS__]]
 
@@ -388,15 +389,113 @@
         NSString *where = [NSString stringWithFormat:@"name = '%@'", self.detailName];
         NSString *strOrderBy = @"date desc";
         _objects = [CureData searchWithWhere:where orderBy:strOrderBy offset:0 count:100];
+        
     }
+    
     return _objects;
 }
 -(NSArray *)objectsByDateAsc
 {
     if (_objectsByDateAsc == nil) {
         _objectsByDateAsc = [[self.objects reverseObjectEnumerator] allObjects];
+        
+        dispatch_queue_t concurrentQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_async(concurrentQueue, ^{
+//            __block UIImage *image = nil;
+            dispatch_sync(concurrentQueue, ^{
+                /*download the image here*/
+                [self updateDb];
+                
+//                NSString *urlString = @"http://cms.csdnimg.cn/article/201310/09/5254b7b6c74cb.jpg";
+//                NSURL *url = [NSURL URLWithString:urlString];
+//                NSURLRequest *urlRequest = [NSURLRequest requestWithURL:url];
+//                NSError *downloadError = nil;
+//                NSData *imageData = [NSURLConnection sendSynchronousRequest:urlRequest returningResponse:nil error:&downloadError];
+//                if (downloadError == nil && imageData != nil) {
+//                    image = [UIImage imageWithData:imageData];
+//                }
+//                else if(downloadError != nil){
+//                    NSLog(@"Error happened = %@",downloadError);
+//                }
+//                else{
+//                    NSLog(@"No data could get download from the URL");
+//                }  
+            });
+        });
+
     }
     return _objectsByDateAsc;
+    
+}
+
+-(void)updateDb
+{
+    
+    /*
+     * desc  : 提交POST请求
+     * param :  URLString - 请求地址
+     *          parameters - 请求参数
+     *          success - 请求成功回调的block
+     *          failure - 请求失败回调的block
+     */
+    NSString *SERVER_URL = @"http://101.200.184.162:8080"; //101.200.184.162:8080
+    NSString *update_date = @"/bbcure/update_data/";
+    
+    for (CureData *data in _objects) {
+        
+        //请求的manager
+        AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+        
+        NSDateFormatter *df = [[NSDateFormatter alloc]init];//格式化
+        [df setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+        
+        //请求参数
+        NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:10];
+        [params setObject:data.name forKey:@"name"];
+        [params setObject:[NSString stringWithFormat:@"%ld", (long)data.cureDuration] forKey:@"cureDuration"];
+        [params setObject:[df stringFromDate:data.date] forKey:@"create_at"];
+        [params setObject:@"bbchen" forKey:@"operator"];
+        [params setObject:@"0" forKey:@"status"];
+        if (data.note != nil) {
+            [params setObject:data.note forKey:@"note"];
+        }
+        
+        
+        //            NSDictionary *parameters = @{
+        //                                         @"name" : data.name,
+        //                                         @"cureDuration" : [NSString stringWithFormat:@"%ld", (long)data.cureDuration],
+        //                                         @"create_at" :[df stringFromDate:data.date],
+        //                                         //                                     @"note" : data.note,
+        //                                         @"operator" : @"bbchen",
+        //                                         @"status" : @"0"
+        //                                         };
+        
+        if (data.image == nil){
+            
+            [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:params
+                  success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
+                      NSLog(@"update sucess!!!");
+                  } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
+                      NSLog(@"err:%@", error);
+                  }];
+        }
+        else {
+            [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:params constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+                UIImage *image = data.image;
+                NSData *data_img = UIImageJPEGRepresentation(image, 0.5);
+                NSString *filename = [NSString stringWithFormat:@"%@_%@.jpg", [params objectForKey:@"operator"], [params objectForKey:@"create_at"]];
+                [formData appendPartWithFileData:data_img name:@"image" fileName:filename mimeType:@"image/jpeg"];
+                
+                
+            } success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
+                NSLog(@"update sucess!!!");
+            } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
+                NSLog(@"err:%@", error);
+            }];
+            
+        }
+        
+    }
 }
 
 @end

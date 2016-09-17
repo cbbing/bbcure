@@ -396,57 +396,10 @@
     {
         LKDBHelper *globalHelper = [CureData getUsingLKDBHelper];
         NSString *sql = [NSString stringWithFormat:@"select name, cureDuration, date, max(date) from @t group by name order by date desc limit 12"];
+//        NSString *sql = [NSString stringWithFormat:@"select name, image, cureDuration, date, max(date) from @t where length(image)>0  order by date desc limit 12"];
         
         _objects = [globalHelper searchWithSQL:sql toClass:[CureData class]];
         //_objects = [CureData searchWithWhere:nil orderBy:@"timeIntervalSince1970 desc" offset:0 count:100];
-        
-        //请求参数
-        NSDictionary *parameters = @{
-                                     @"name" : @"iosuser",
-                                     @"cureDuration" : @"12",
-                                     @"create_at" : @"2016-09-13 22:23:26",
-                                     @"note" : @"yes",
-                                     @"operator" : @"bbchen",
-                                     @"status" : @"0"
-                                     };
-        //请求的manager
-        AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
-        /*
-         * desc  : 提交POST请求
-         * param :  URLString - 请求地址
-         *          parameters - 请求参数
-         *          success - 请求成功回调的block
-         *          failure - 请求失败回调的block
-         */
-        NSString *SERVER_URL = @"http://101.200.184.162:8080";
-        NSString *update_date = @"/bbcure/update_data/";
-        
-        [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:parameters constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
-            CureData *data = self.objects[0];
-            UIImage *image = data.image;
-            NSData *data_img = UIImageJPEGRepresentation(image, 1.0);
-            [formData appendPartWithFileData:data_img name:@"ios_image1" fileName:@"image1.jpg" mimeType:@"image/jpeg"];
-            
-        } success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
-            NSLog(@"update sucess!!!");
-        } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
-            NSLog(@"err:%@", error);
-        }];
-        
-        /*
-        [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:parameters success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
-            NSLog(@"update sucess!!!");
-            if (responseObject != nil) {
-                NSDictionary *respObj = responseObject;
-                NSString *result = [respObj objectForKey:@"result"];
-                if (result && [result isEqualToString:@"ok"]) {
-                    NSLog(@"the result: %@", result);
-                }
-                
-            }
-        } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
-            NSLog(@"err:%@", error);
-        }];*/
         
         
         
