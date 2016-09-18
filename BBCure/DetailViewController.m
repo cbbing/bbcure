@@ -438,64 +438,80 @@
      *          success - 请求成功回调的block
      *          failure - 请求失败回调的block
      */
-    NSString *SERVER_URL = @"http://101.200.184.162:8080"; //101.200.184.162:8080
+    NSString *SERVER_URL = @"http://192.168.31.147:8080"; //101.200.184.162:8080
     NSString *update_date = @"/bbcure/update_data/";
+    NSString *query_maxdate = [NSString stringWithFormat:@"/bbcure/max_date/%@/", self.detailName];
     
-    for (CureData *data in _objects) {
+    AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+    manager.requestSerializer = [AFHTTPRequestSerializer serializer];
+    manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    
+    NSString *query_url = [NSString stringWithFormat:@"%@%@", SERVER_URL, query_maxdate];
+    query_url = [query_url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
+    [manager GET:query_url  parameters:nil success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
+        NSString *max_date = [NSString stringWithString:operation.responseString];
+        NSLog(@"%@", max_date);
         
-        //请求的manager
-        AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+        NSString *where = [NSString stringWithFormat:@"name = '%@' and date > '%@'", self.detailName, max_date];
+        NSString *strOrderBy = @"date desc";
         
-        NSDateFormatter *df = [[NSDateFormatter alloc]init];//格式化
-        [df setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+        NSMutableArray *objects_sql = [CureData searchWithWhere:where orderBy:strOrderBy offset:0 count:100];
         
-        //请求参数
-        NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:10];
-        [params setObject:data.name forKey:@"name"];
-        [params setObject:[NSString stringWithFormat:@"%ld", (long)data.cureDuration] forKey:@"cureDuration"];
-        [params setObject:[df stringFromDate:data.date] forKey:@"create_at"];
-        [params setObject:@"bbchen" forKey:@"operator"];
-        [params setObject:@"0" forKey:@"status"];
-        if (data.note != nil) {
-            [params setObject:data.note forKey:@"note"];
-        }
-        
-        
-        //            NSDictionary *parameters = @{
-        //                                         @"name" : data.name,
-        //                                         @"cureDuration" : [NSString stringWithFormat:@"%ld", (long)data.cureDuration],
-        //                                         @"create_at" :[df stringFromDate:data.date],
-        //                                         //                                     @"note" : data.note,
-        //                                         @"operator" : @"bbchen",
-        //                                         @"status" : @"0"
-        //                                         };
-        
-        if (data.image == nil){
+        for (CureData *data in objects_sql) {
             
-            [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:params
-                  success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
-                      NSLog(@"update sucess!!!");
-                  } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
-                      NSLog(@"err:%@", error);
-                  }];
-        }
-        else {
-            [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:params constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
-                UIImage *image = data.image;
-                NSData *data_img = UIImageJPEGRepresentation(image, 0.5);
-                NSString *filename = [NSString stringWithFormat:@"%@_%@.jpg", [params objectForKey:@"operator"], [params objectForKey:@"create_at"]];
-                [formData appendPartWithFileData:data_img name:@"image" fileName:filename mimeType:@"image/jpeg"];
+            //请求的manager
+            AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
+            
+            NSDateFormatter *df = [[NSDateFormatter alloc]init];//格式化
+            [df setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+            
+            //请求参数
+            NSMutableDictionary *params = [NSMutableDictionary dictionaryWithCapacity:10];
+            [params setObject:data.name forKey:@"name"];
+            [params setObject:[NSString stringWithFormat:@"%ld", (long)data.cureDuration] forKey:@"cureDuration"];
+            [params setObject:[df stringFromDate:data.date] forKey:@"create_at"];
+            [params setObject:@"bbchen" forKey:@"operator"];
+            [params setObject:@"0" forKey:@"status"];
+            if (data.note != nil) {
+                [params setObject:data.note forKey:@"note"];
+            }
+            
+            
+            if (data.image == nil){
                 
+                [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:params
+                      success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
+                          NSLog(@"update sucess!!!");
+                      } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
+                          NSLog(@"err:%@", error);
+                      }];
+            }
+            else {
+                [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:params constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+                    UIImage *image = data.image;
+                    NSData *data_img = UIImageJPEGRepresentation(image, 0.5);
+                    NSString *filename = [NSString stringWithFormat:@"%@_%@.jpg", [params objectForKey:@"operator"], [params objectForKey:@"create_at"]];
+                    [formData appendPartWithFileData:data_img name:@"image" fileName:filename mimeType:@"image/jpeg"];
+                    
+                    
+                } success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
+                    NSLog(@"update sucess!!!");
+                } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
+                    NSLog(@"err:%@", error);
+                }];
                 
-            } success:^(AFHTTPRequestOperation * _Nonnull operation, id  _Nonnull responseObject) {
-                NSLog(@"update sucess!!!");
-            } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
-                NSLog(@"err:%@", error);
-            }];
+            }
             
         }
         
-    }
+        
+    } failure:^(AFHTTPRequestOperation * _Nonnull operation, NSError * _Nonnull error) {
+        NSLog(@"err:%@", error);
+    }];
+    
+    
+    
 }
 
 @end
