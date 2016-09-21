@@ -13,6 +13,7 @@
 #import "AppMacro.h"
 #import "PellTableViewSelect.h"
 #import <AFNetworking.h>
+#import "CHAlertView.h"
 
 
 @interface MasterViewController ()
@@ -119,7 +120,7 @@
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        
+        /*
         //删除数据库对应数据
         CureData *data = self.objects[indexPath.row];
         [CureData deleteWithWhere:[NSString stringWithFormat:@"name='%@'", data.name]];
@@ -127,9 +128,59 @@
         
         [self.objects removeObjectAtIndex:indexPath.row];
         [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        */
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
     }
+}
+- (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return @"删除";
+}
+
+- (NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath {
+    // 使用 Block 回调,实现点击后的方法
+    UITableViewRowAction *action = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleNormal title:@"隐藏" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        NSLog(@"%@", indexPath);
+        
+        CureData *data = self.objects[indexPath.row];
+        data
+        
+    }];
+    
+    UITableViewRowAction *action1 = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDefault title:@"删除" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        NSLog(@"%@", indexPath);
+        
+        
+        NSString *strTitle = @"确认删除？";
+        NSString *strMsg = @"删除后不可恢复";
+        NSString *strCancel = @"取消";
+        NSString *strOk = @"删除";
+        
+        
+        [CHAlertView showCHAlertViewWithTitle:strTitle message:strMsg cancleButtonTitle:strCancel okButtonTitle:strOk okClickHandle:^{
+            
+             //删除数据库对应数据
+             CureData *data = self.objects[indexPath.row];
+             [CureData deleteWithWhere:[NSString stringWithFormat:@"name='%@'", data.name]];
+             //[CureData deleteToDB:self.objects[indexPath.row]];
+             
+             [self.objects removeObjectAtIndex:indexPath.row];
+             [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+            
+        } cancelClickHandle:^{
+            NSLog(@"取消");
+        }];
+        
+        
+//        UIAlertView *alertview = [[UIAlertView alloc] initWithTitle:@"确认删除？" message:@"删除后不可恢复" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"删除", nil];
+//        [alertview show];
+        
+        
+
+        
+    }];
+    // 苹果的习惯,右侧的多个按钮,显示位置是反着的
+    return @[action, action1];
 }
 
 //#pragma mark - UICureTableCellDelegate

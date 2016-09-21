@@ -13,6 +13,7 @@
 #import "MHPresenterImageView.h"
 #import "UIImageView+WebCache.h"
 #import <AFNetworking.h>
+#import "NSString+MD5.h"
 
 #define addText(fmt, ...) [self add:[NSString stringWithFormat:fmt,##__VA_ARGS__]]
 
@@ -46,6 +47,11 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    NSString *string = @"MD5加密方法";
+    //调用MD5加密方法,输出结果
+    NSLog(@"MD5 == %@",[string stringToMD5:string]);
+    
     
     self.navigationItem.rightBarButtonItem = self.addNewButtonItem;
     self.navigationItem.title = self.detailName;
@@ -458,6 +464,7 @@
         
         NSMutableArray *objects_sql = [CureData searchWithWhere:where orderBy:strOrderBy offset:0 count:100];
         
+        
         for (CureData *data in objects_sql) {
             
             //请求的manager
@@ -477,6 +484,10 @@
                 [params setObject:data.note forKey:@"note"];
             }
             
+            NSString *str = [NSString stringWithFormat:@"%@%@%@", [params objectForKey:@"operator"],
+                   [params objectForKey:@"name"],[params objectForKey:@"create_at"]];
+            
+            [params setObject:[str stringToMD5:str] forKey:@"uuid"];
             
             if (data.image == nil){
                 
@@ -491,7 +502,7 @@
                 [manager POST:[NSString stringWithFormat:@"%@%@", SERVER_URL, update_date] parameters:params constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
                     UIImage *image = data.image;
                     NSData *data_img = UIImageJPEGRepresentation(image, 0.5);
-                    NSString *filename = [NSString stringWithFormat:@"%@_%@.jpg", [params objectForKey:@"operator"], [params objectForKey:@"create_at"]];
+                    NSString *filename = [NSString stringWithFormat:@"%@_%@", [params objectForKey:@"operator"], [params objectForKey:@"create_at"]];
                     [formData appendPartWithFileData:data_img name:@"image" fileName:filename mimeType:@"image/jpeg"];
                     
                     

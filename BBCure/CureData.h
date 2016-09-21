@@ -18,5 +18,6 @@
 //@property (nonatomic) double timeIntervalSince1970;
 @property (nonatomic, strong) NSString *note;//备注
 @property (nonatomic, strong) UIImage *image;//图片
+@property                     NSInteger status;//类型， 默认为0； 4为隐藏
 
 @end
