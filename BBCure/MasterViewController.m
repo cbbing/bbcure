@@ -446,7 +446,7 @@
     if (_objects == nil)
     {
         LKDBHelper *globalHelper = [CureData getUsingLKDBHelper];
-        NSString *sql = [NSString stringWithFormat:@"select name, cureDuration, date, max(date) from @t group by name order by date desc limit 12"];
+        NSString *sql = [NSString stringWithFormat:@"select name, cureDuration, date, max(date) from @t group by name order by date desc limit 100"];
 //        NSString *sql = [NSString stringWithFormat:@"select name, image, cureDuration, date, max(date) from @t where length(image)>0  order by date desc limit 12"];
         
         _objects = [globalHelper searchWithSQL:sql toClass:[CureData class]];
