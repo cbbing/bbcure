@@ -11,6 +11,8 @@
 #import "AppMacro.h"
 #import "BKPasscodeLockScreenManager.h"
 
+#import "MobClick.h"
+
 
 @interface SettingViewController ()
 
@@ -49,10 +51,27 @@
     _authWithTouchIDFirstSwitch = [[UISwitch alloc] init];
     [_authWithTouchIDFirstSwitch setOn:YES];
     
+    
+    BOOL bShowImg = ![userDefaults boolForKey:NOT_SHOW_DETAIL_IMAGE];
+    _showImageSwitch = [[UISwitch alloc] init];
+    [_showImageSwitch setOn:bShowImg];
+    
     self.title = @"设置";
     
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:@"reuseIdentifier"];
 }
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"SettingVidewController"];//("PageOne"为页面名称，可自定义)
+}
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"SettingVidewController"];
+}
+
 
 #pragma mark - Table view data source
 
@@ -63,7 +82,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 2;
+    return 3;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -78,6 +97,10 @@
             
         case 0:
             if (indexPath.row == 0) {
+                cell.textLabel.text = @"显示详细记录中的图片";
+                cell.accessoryView = self.showImageSwitch;
+            }
+            else if (indexPath.row == 1) {
                 cell.textLabel.text = @"启用密码锁";
                 cell.accessoryView = self.lockWhenEnterBackgroundSwitch;
             } else {
@@ -89,9 +112,9 @@
             
         case 1:
             if (indexPath.row == 0) {
-                cell.textLabel.text = @"设置密码";
-            } else if (indexPath.row == 1) {
                 cell.textLabel.text = @"修改密码";
+            } else if (indexPath.row == 1) {
+                cell.textLabel.text = @"重置密码";
             }
             break;
 
@@ -125,10 +148,10 @@
         
         switch (indexPath.row) {
             case 0:
-                [self presentPasscodeViewControllerWithType:BKPasscodeViewControllerNewPasscodeType];
+                [self presentPasscodeViewControllerWithType:BKPasscodeViewControllerChangePasscodeType];
                 break;
             case 1:
-                [self presentPasscodeViewControllerWithType:BKPasscodeViewControllerChangePasscodeType];
+                [self presentPasscodeViewControllerWithType:BKPasscodeViewControllerNewPasscodeType];
                 break;
             
             default:
@@ -264,6 +287,9 @@
 {
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     [userDefaults setBool:self.lockWhenEnterBackgroundSwitch.isOn forKey:ACTIVIE_PASSCODE];
+    [userDefaults setBool:!self.showImageSwitch.isOn forKey:NOT_SHOW_DETAIL_IMAGE];
+    
+    
     
 //    if (!self.lockWhenEnterBackgroundSwitch.isOn) {
 //        

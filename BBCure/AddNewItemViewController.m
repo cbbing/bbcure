@@ -9,6 +9,7 @@
 #import "AddNewItemViewController.h"
 #import "masonry.h"
 #import "CureData.h"
+#import "MobClick.h"
 
 @interface AddNewItemViewController()
 {
@@ -61,6 +62,17 @@
 
 
 
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"AddNewItemViewController"];//("PageOne"为页面名称，可自定义)
+}
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"AddNewItemViewController"];
 }
 
 #pragma mark - UIActionSheetDelegate

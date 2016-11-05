@@ -16,4 +16,7 @@
 #define PASSCODE @"user_passcode"
 #define BKPasscodeKeychainServiceName @"BKPasscodeSampleService"
 
+#define NOT_SHOW_DETAIL_IMAGE @"not_show_detail_image"
+
+
 #endif
