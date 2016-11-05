@@ -15,6 +15,7 @@
 #import <AFNetworking.h>
 #import "CHAlertView.h"
 
+#import "MobClick.h"
 
 @interface MasterViewController ()
 
@@ -53,11 +54,18 @@
     [self loadPasscodeView];
     
 }
--(void)viewWillAppear:(BOOL)animated
+
+- (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    
+    [MobClick beginLogPageView:@"MasterViewController"];//("PageOne"为页面名称，可自定义)
 }
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"MasterViewController"];
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -143,7 +151,7 @@
         NSLog(@"%@", indexPath);
         
         CureData *data = self.objects[indexPath.row];
-        data
+        
         
     }];
     
@@ -401,7 +409,7 @@
         // To supports Touch ID feature, set BKTouchIDManager instance to view controller.
         // It only supports iOS 8 or greater.
         viewController.touchIDManager = [[BKTouchIDManager alloc] initWithKeychainServiceName:BKPasscodeKeychainServiceName];
-        viewController.touchIDManager.promptText = @"Scan fingerprint to authenticate";   // You can set prompt text.
+        viewController.touchIDManager.promptText = @"通过Home键验证已有手机指纹";   // You can set prompt text.
         
 //        [viewController startTouchIDAuthenticationIfPossible:^(BOOL prompted) {
 //            
@@ -412,6 +420,9 @@
 //                [self presentViewController:navController animated:YES completion:nil];
 //            }
 //        }];
+        
+        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:viewController];
+        [self.splitViewController presentViewController:navController animated:YES completion:nil];
         
     }
     
@@ -452,6 +463,13 @@
         _objects = [globalHelper searchWithSQL:sql toClass:[CureData class]];
         //_objects = [CureData searchWithWhere:nil orderBy:@"timeIntervalSince1970 desc" offset:0 count:100];
         
+//        if ([_objects count] == 0)
+//        {
+//            CureData *data = [[CureData new] init];
+//            data.name = @"点击上方的‘添加’按钮添加条目";
+//            
+//            [_objects addObject:data];
+//        }
         
         
     }

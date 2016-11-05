@@ -15,6 +15,8 @@
 #import <AFNetworking.h>
 #import "NSString+MD5.h"
 
+#import "MobClick.h"
+
 #define addText(fmt, ...) [self add:[NSString stringWithFormat:fmt,##__VA_ARGS__]]
 
 #define UserDefault_ShowTableView @"showTableView"
@@ -26,6 +28,8 @@
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet BEMSimpleLineGraphView *graphView;
+@property (weak, nonatomic) IBOutlet UITextView* textView;
+
 //@property (weak, nonatomic) IBOutlet UIView *imageContainerView;
 
 //@property (weak, nonatomic) IBOutlet MHPresenterImageView *imageView;
@@ -64,7 +68,7 @@
 {
     [super viewDidAppear:animated];
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    if ([userDefaults boolForKey:UserDefault_ShowTableView]) {
+    if (![userDefaults boolForKey:UserDefault_ShowTableView]) {
         [self.tableView setHidden:NO];
         [self.graphView setHidden:YES];
         self.tableView.delegate = self;
@@ -80,8 +84,20 @@
         [self.graphView reloadGraph];
         self.navigationItem.leftBarButtonItem = nil;
     }
+    
+    [self.textView setText:@"按左侧的添加按钮添加条目!"];
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [MobClick beginLogPageView:@"DetailViewController"];//("PageOne"为页面名称，可自定义)
+}
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [MobClick endLogPageView:@"DetailViewController"];
+}
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -360,8 +376,11 @@
     
     NSInteger index = 0;
     
-    BOOL bShowImg = NO;
-    if (bShowImg)
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    
+    BOOL bShowImg = [userDefaults boolForKey:NOT_SHOW_DETAIL_IMAGE];
+    if (!bShowImg)
         for (CureData *data in self.objects ){
             if (data.image != nil) {
             MHPresenterImageView *imageView = [[MHPresenterImageView alloc] initWithFrame:CGRectMake(x, y, width, width)];
@@ -410,7 +429,7 @@
 //            __block UIImage *image = nil;
             dispatch_sync(concurrentQueue, ^{
                 /*download the image here*/
-                [self updateDb];
+//                [self updateDb]; //暂时屏蔽，后续打开此行
                 
 //                NSString *urlString = @"http://cms.csdnimg.cn/article/201310/09/5254b7b6c74cb.jpg";
 //                NSURL *url = [NSURL URLWithString:urlString];

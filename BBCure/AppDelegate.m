@@ -10,6 +10,8 @@
 #import "DetailViewController.h"
 #import "BKPasscodeViewController.h"
 #import "AppMacro.h"
+//#import "UMMobClick/MobClick.h"
+#import "MobClick.h"
 
 @interface AppDelegate () <UISplitViewControllerDelegate>
 
@@ -41,6 +43,13 @@
     UINavigationController *navigationController = [self.splitViewController.viewControllers lastObject];
     navigationController.topViewController.navigationItem.leftBarButtonItem = self.splitViewController.displayModeButtonItem;
     self.splitViewController.delegate = self;
+    
+    //友盟统计
+//    UMConfigInstance.appKey = @"581d501304e2053426001a5c";
+//    UMConfigInstance.ChannelId = @"App Store";
+//    [MobClick startWithConfigure:UMConfigInstance];//配置以上参数后调用此方法初始化SDK！
+    [MobClick startWithAppkey:@"581d501304e2053426001a5c" reportPolicy:BATCH channelId:@"App Store"];
+    
     return YES;
 }
 
@@ -169,7 +178,7 @@
         // To supports Touch ID feature, set BKTouchIDManager instance to view controller.
         // It only supports iOS 8 or greater.
         viewController.touchIDManager = [[BKTouchIDManager alloc] initWithKeychainServiceName:BKPasscodeKeychainServiceName];
-        viewController.touchIDManager.promptText = @"Scan fingerprint to authenticate";   // You can set prompt text.
+        viewController.touchIDManager.promptText = @"通过Home键验证已有手机指纹";   // You can set prompt text.
         
         // Show Touch ID user interface
 //        [viewController startTouchIDAuthenticationIfPossible:^(BOOL prompted) {
@@ -182,8 +191,8 @@
 //            }
 //        }];
         
-//        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:viewController];
-//        [self.splitViewController presentViewController:navController animated:YES completion:nil];
+        UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:viewController];
+        [self.splitViewController presentViewController:navController animated:YES completion:nil];
     }
     
     

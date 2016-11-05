@@ -18,6 +18,8 @@
 @property (strong, nonatomic) UISwitch          *lockWhenEnterBackgroundSwitch;
 @property (strong, nonatomic) UISwitch          *authWithTouchIDFirstSwitch;
 
+@property (strong, nonatomic) UISwitch          *showImageSwitch;
+
 @property (strong, nonatomic) NSString          *passcode;
 @property (nonatomic) NSUInteger                failedAttempts;
 @property (strong, nonatomic) NSDate            *lockUntilDate;
